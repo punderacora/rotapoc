@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acora Rota Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ac-white:#FFFFFF;--ac-bg:#F2F2F0;--ac-card:#EBEBEB;
+  --ac-border:#DCDCDA;--ac-border2:#C8C8C6;--ac-text:#0D0D0D;--ac-text2:#3A3A3A;
+  --ac-muted:#777770;--ac-red:#E8311A;--ac-red-dark:#C42810;--ac-red-light:#FAE8E5;
+  --ac-red-bg:rgba(232,49,26,0.07);--ac-amber:#D97706;--ac-amber-bg:rgba(217,119,6,0.08);
+  --ac-green:#1A7A3C;--ac-green-bg:rgba(26,122,60,0.08);
+  --ac-blue:#1A5FAE;--ac-blue-bg:rgba(26,95,174,0.08);
+  --ac-purple:#4C1D95;--ac-purple-bg:#EDE9FE;--ac-purple-border:#C4B5FD;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',system-ui,sans-serif;font-size:13px;color:var(--ac-text);background:var(--ac-bg);}
+.app{display:flex;flex-direction:column;min-height:100vh;}
+.topbar{display:flex;align-items:center;gap:10px;padding:0 18px;height:52px;border-bottom:1px solid var(--ac-border);background:var(--ac-white);flex-wrap:wrap;}
+.logo{display:flex;align-items:center;gap:8px;}
+.logo-mark{width:22px;height:22px;background:var(--ac-red);border-radius:2px;display:flex;align-items:center;justify-content:center;}
+.logo-mark svg{width:14px;height:14px;fill:white;}
+.logo-text{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;}
+.logo-sub{font-size:12px;font-weight:500;color:var(--ac-muted);}
+.badge{font-size:11px;padding:2px 9px;border-radius:2px;font-weight:600;letter-spacing:0.03em;}
+.b-red{background:var(--ac-red-bg);color:var(--ac-red);border:1px solid rgba(232,49,26,0.2);}
+.b-amber{background:var(--ac-amber-bg);color:var(--ac-amber);border:1px solid rgba(217,119,6,0.2);}
+.b-green{background:var(--ac-green-bg);color:var(--ac-green);border:1px solid rgba(26,122,60,0.2);}
+.b-grey{background:var(--ac-card);color:var(--ac-muted);border:1px solid var(--ac-border);}
+.b-blue{background:var(--ac-blue-bg);color:var(--ac-blue);border:1px solid rgba(26,95,174,0.2);}
+.b-purple{background:var(--ac-purple-bg);color:var(--ac-purple);border:1px solid var(--ac-purple-border);}
+.tabs{display:flex;border-bottom:2px solid var(--ac-border);padding:0 18px;background:var(--ac-white);overflow-x:auto;}
+.tab{padding:10px 13px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--ac-muted);background:none;border-top:none;border-left:none;border-right:none;white-space:nowrap;letter-spacing:0.04em;text-transform:uppercase;}
+.tab:hover{color:var(--ac-text);}
+.tab.active{color:var(--ac-red);border-bottom-color:var(--ac-red);}
+.pane{display:none;flex-direction:column;flex:1;}
+.pane.active{display:flex;}
+.toolbar{display:flex;align-items:center;gap:6px;padding:8px 18px;border-bottom:1px solid var(--ac-border);background:var(--ac-white);flex-wrap:wrap;}
+select,input[type=text],input[type=date],input[type=number],input[type=email]{font-size:12px;padding:4px 10px;height:32px;border-radius:2px;border:1px solid var(--ac-border2);background:var(--ac-white);color:var(--ac-text);font-family:'Barlow',sans-serif;}
+select:focus,input:focus{outline:2px solid var(--ac-red);border-color:var(--ac-red);}
+.btn{font-size:12px;padding:4px 14px;height:32px;cursor:pointer;border-radius:2px;font-family:'Barlow',sans-serif;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;}
+.btn-ghost{border:1px solid var(--ac-border2);background:transparent;color:var(--ac-text2);}
+.btn-ghost:hover{border-color:var(--ac-red);color:var(--ac-red);}
+.btn-primary{border:none;background:var(--ac-red);color:var(--ac-white);}
+.btn-primary:hover{background:var(--ac-red-dark);}
+.btn-danger{border:1px solid rgba(232,49,26,0.3);background:var(--ac-red-bg);color:var(--ac-red);}
+.btn-success{border:1px solid rgba(26,122,60,0.3);background:var(--ac-green-bg);color:var(--ac-green);}
+.btn-sm{font-size:11px;padding:2px 10px;height:26px;}
+.rota-wrap{overflow:auto;flex:1;}
+table.rt{border-collapse:collapse;font-size:11px;min-width:100%;}
+table.rt th,table.rt td{border:1px solid var(--ac-border);padding:2px 3px;text-align:center;white-space:nowrap;}
+table.rt th{background:var(--ac-card);font-weight:700;position:sticky;top:0;z-index:2;color:var(--ac-text2);letter-spacing:0.04em;font-size:10px;text-transform:uppercase;}
+table.rt th.r0{top:0;z-index:4;}
+table.rt th.r1{top:22px;z-index:4;}
+table.rt th.r2{top:44px;z-index:4;}
+.sc1{position:sticky;left:0;z-index:3;background:var(--ac-white);text-align:left;padding:3px 8px;min-width:100px;max-width:100px;overflow:hidden;text-overflow:ellipsis;}
+.sc2{position:sticky;left:100px;z-index:3;background:var(--ac-white);text-align:center;min-width:36px;}
+.sc3{position:sticky;left:136px;z-index:3;background:var(--ac-white);text-align:left;padding:2px 6px;min-width:72px;max-width:72px;overflow:hidden;text-overflow:ellipsis;font-size:10px;color:var(--ac-muted);}
+th.sc1,th.sc2,th.sc3{background:var(--ac-card);z-index:5;}
+.we{background:#F8F8F6!important;}
+.cell-sel{font-size:10px;padding:1px;border:none;background:transparent;cursor:pointer;width:64px;border-radius:2px;text-align:center;font-family:'Barlow',sans-serif;}
+.cell-sel:focus{outline:1px solid var(--ac-red);}
+.s-6am{background:#DBEAFE;color:#1E3A8A;}
+.s-7am{background:#D1FAE5;color:#065F46;}
+.s-8am{background:#DCFCE7;color:#14532D;}
+.s-9am{background:#FEF9C3;color:#713F12;}
+.s-10am{background:#EDE9FE;color:#4C1D95;}
+.s-2pm{background:#FCE7F3;color:#831843;}
+.s-7pm{background:#1E1B4B;color:#C7D2FE;}
+.s-AL{background:#FEE2E2;color:#991B1B;}
+.s-TOIL{background:#FEF3C7;color:#92400E;}
+.s-SB{background:#F3F4F6;color:#6B7280;}
+.s-OFF{background:#F9FAFB;color:#D1D5DB;}
+.s-auto{outline:2px solid var(--ac-red);outline-offset:-2px;}
+.sec-hdr td{background:#F2F2F0;font-weight:700;color:var(--ac-red);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border-top:2px solid var(--ac-border2);}
+.tl-sec-hdr td{background:#F5F3FF;font-weight:700;color:var(--ac-purple);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;border-top:2px solid var(--ac-purple-border);}
+.cov-gap{background:#FEE2E2!important;color:#991B1B!important;font-weight:700;}
+.cov-tl-gap{background:#FEF3C7!important;color:#92400E!important;font-weight:700;}
+.panel{padding:18px;overflow-y:auto;flex:1;background:var(--ac-bg);}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--ac-text);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:12px;}
+.info-box{background:var(--ac-red-bg);border-left:3px solid var(--ac-red);padding:10px 14px;font-size:12px;color:var(--ac-text2);margin-bottom:14px;}
+.warn-box{background:var(--ac-amber-bg);border-left:3px solid var(--ac-amber);padding:10px 14px;font-size:12px;color:var(--ac-text2);margin-bottom:10px;}
+.success-box{background:var(--ac-green-bg);border-left:3px solid var(--ac-green);padding:10px 14px;font-size:12px;color:var(--ac-text2);margin-bottom:10px;}
+.note-box{background:var(--ac-blue-bg);border-left:3px solid var(--ac-blue);padding:10px 14px;font-size:12px;color:var(--ac-text2);margin-bottom:14px;}
+.purple-box{background:var(--ac-purple-bg);border-left:3px solid var(--ac-purple);padding:10px 14px;font-size:12px;color:var(--ac-text2);margin-bottom:14px;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg label{font-size:11px;color:var(--ac-muted);letter-spacing:0.04em;text-transform:uppercase;font-weight:600;}
+.form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:flex-end;}
+.a-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--ac-border);background:var(--ac-white);margin-bottom:5px;}
+.av{width:32px;height:32px;border-radius:2px;background:var(--ac-red);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ac-white);flex-shrink:0;}
+.av-tl{background:var(--ac-purple);}
+.av-on{background:var(--ac-blue);}
+.cov-section{padding:10px 18px;border-top:2px solid var(--ac-border);background:var(--ac-white);}
+.cov-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.cov-card{border:1px solid var(--ac-border);padding:8px 12px;min-width:82px;background:var(--ac-white);}
+.cov-card .ct{font-size:10px;font-weight:700;color:var(--ac-muted);letter-spacing:0.05em;text-transform:uppercase;}
+.cov-card .cn{font-size:22px;font-weight:800;font-family:'Barlow Condensed',sans-serif;margin:1px 0;}
+.cov-card .cr{font-size:10px;color:var(--ac-muted);}
+.cov-card-tl{border:1px solid var(--ac-purple-border);padding:8px 12px;min-width:120px;background:#F5F3FF;}
+.cov-card-tl .ct{font-size:10px;font-weight:700;color:var(--ac-purple);letter-spacing:0.05em;text-transform:uppercase;}
+.cov-card-tl .cn{font-size:22px;font-weight:800;font-family:'Barlow Condensed',sans-serif;margin:1px 0;}
+.cov-card-tl .cr{font-size:10px;color:var(--ac-purple);opacity:.7;}
+.ok .cn{color:var(--ac-green);}
+.gp .cn{color:var(--ac-red);}
+.gp{border-color:rgba(232,49,26,0.4)!important;background:var(--ac-red-light)!important;}
+.mn .cn{color:var(--ac-amber);}
+.tl-ok .cn{color:var(--ac-green);}
+.tl-warn .cn{color:var(--ac-amber);}
+.tl-gap .cn{color:var(--ac-red);}
+.tl-gap{border-color:rgba(232,49,26,0.4)!important;background:var(--ac-red-light)!important;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;padding:8px 18px;border-top:1px solid var(--ac-border);background:var(--ac-white);}
+.li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ac-muted);font-weight:500;}
+.ls{width:12px;height:12px;border-radius:1px;flex-shrink:0;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:14px;}
+.stat-card{border:1px solid var(--ac-border);padding:12px 14px;background:var(--ac-white);}
+.stat-card .sv{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;}
+.stat-card .sl{font-size:11px;color:var(--ac-muted);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;}
+.swap-card{border:1px solid var(--ac-border);padding:12px 14px;margin-bottom:8px;background:var(--ac-white);}
+.pref-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px;margin-top:8px;}
+.pref-chip{padding:6px 8px;font-size:11px;cursor:pointer;text-align:center;user-select:none;font-weight:600;border:1px solid var(--ac-border);background:var(--ac-white);color:var(--ac-muted);text-transform:uppercase;letter-spacing:0.03em;}
+.pref-chip:hover{border-color:var(--ac-red);color:var(--ac-red);}
+.pref-chip.liked{background:var(--ac-green-bg);color:var(--ac-green);border-color:rgba(26,122,60,0.3);}
+.pref-chip.disliked{background:var(--ac-red-bg);color:var(--ac-red);border-color:rgba(232,49,26,0.3);}
+.pref-chip.unavail{background:var(--ac-purple-bg);color:var(--ac-purple);border-color:var(--ac-purple-border);}
+.req-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;}
+.req-card{border:1px solid var(--ac-border);padding:10px 12px;background:var(--ac-white);}
+.req-card label{font-size:11px;color:var(--ac-muted);display:block;margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.03em;}
+.auto-summary{border:1px solid var(--ac-border);padding:14px;margin-bottom:14px;background:var(--ac-white);}
+.auto-rule{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--ac-border);font-size:12px;color:var(--ac-text2);}
+.auto-rule:last-child{border-bottom:none;}
+.rule-dot{width:8px;height:8px;background:var(--ac-red);flex-shrink:0;margin-top:4px;}
+.fairness-bar{height:6px;background:var(--ac-border);overflow:hidden;margin-top:4px;}
+.fairness-fill{height:100%;background:var(--ac-red);}
+.data-table{width:100%;border-collapse:collapse;font-size:12px;}
+.data-table th{padding:7px 10px;border:1px solid var(--ac-border);font-weight:700;text-align:left;background:var(--ac-card);color:var(--ac-muted);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;}
+.data-table td{padding:6px 10px;border:1px solid var(--ac-border);color:var(--ac-text);background:var(--ac-white);}
+.data-table tr:hover td{background:var(--ac-bg);}
+.sec-label{font-size:11px;font-weight:700;color:var(--ac-red);letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 6px;}
+.divider{border:none;border-top:1px solid var(--ac-border);margin:16px 0;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark"><svg viewBox="0 0 14 14"><rect x="0" y="0" width="6" height="6"/><rect x="8" y="0" width="6" height="6"/><rect x="0" y="8" width="6" height="6"/></svg></div>
+      <span class="logo-text">Acora</span>
+      <span style="color:var(--ac-border2);margin:0 4px;">|</span>
+      <span class="logo-sub">Rota Manager</span>
+    </div>
+    <span class="badge b-grey" id="tb-staff">— staff</span>
+    <span class="badge b-red" id="tb-gaps" style="display:none"></span>
+    <span class="badge b-amber" id="tb-tl" style="display:none"></span>
+    <span class="badge b-amber" id="tb-swaps" style="display:none"></span>
+    <span class="badge b-green" id="tb-auto" style="display:none">Auto-scheduled</span>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <label style="font-size:11px;color:var(--ac-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Week</label>
+      <input type="date" id="wi">
+      <select id="wc" onchange="renderRota()">
+        <option value="1">1 week</option><option value="2" selected>2 weeks</option><option value="4">4 weeks</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('rota')">Rota</button>
+    <button class="tab" onclick="showTab('auto')">Auto-Schedule</button>
+    <button class="tab" onclick="showTab('prefs')">Preferences</button>
+    <button class="tab" onclick="showTab('analysts')">Analysts</button>
+    <button class="tab" onclick="showTab('reqs')">Requirements</button>
+    <button class="tab" onclick="showTab('swaps')">Swaps</button>
+    <button class="tab" onclick="showTab('stats')">Stats</button>
+    <button class="tab" onclick="showTab('mobile')">Analyst View</button>
+  </div>
+
+  <div class="pane active" id="pane-rota">
+    <div class="toolbar">
+      <select id="tf" onchange="renderRota()"><option value="">All teams</option></select>
+      <button class="btn btn-ghost" onclick="cloneWeek()">Clone week →</button>
+      <button class="btn btn-danger btn-sm" onclick="clearAutoShifts()">Clear auto-shifts</button>
+      <button class="btn btn-primary" onclick="exportCSV()">Export CSV</button>
+    </div>
+    <div class="rota-wrap"><table class="rt" id="rt"></table></div>
+    <div class="legend">
+      <div class="li"><div class="ls s-6am"></div>6am</div>
+      <div class="li"><div class="ls s-7am"></div>7am</div>
+      <div class="li"><div class="ls s-8am"></div>8am</div>
+      <div class="li"><div class="ls s-9am"></div>9am</div>
+      <div class="li"><div class="ls s-10am"></div>10am</div>
+      <div class="li"><div class="ls s-2pm"></div>2pm</div>
+      <div class="li"><div class="ls s-7pm"></div>7pm Overnight</div>
+      <div class="li"><div class="ls s-AL"></div>Annual Leave</div>
+      <div class="li"><div class="ls s-TOIL"></div>TOIL</div>
+      <div class="li"><div class="ls s-SB"></div>Standby</div>
+      <div class="li"><div class="ls s-OFF"></div>Day Off</div>
+      <div class="li"><div class="ls s-8am" style="outline:2px solid var(--ac-red);outline-offset:-2px;"></div>Auto-assigned</div>
+    </div>
+    <div class="cov-section">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ac-muted);">Coverage — <span id="cov-lbl" style="color:var(--ac-text);"></span></div>
+      <div class="cov-grid" id="cov-grid"></div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-auto">
+    <div class="panel">
+      <div class="section-title">Auto-Schedule</div>
+      <div class="info-box">Fills analyst shifts fairly — preferences, rest rules and coverage minimums are all respected. Team Leaders are excluded from analyst coverage counts and scheduled independently.</div>
+      <div class="form-row">
+        <div class="fg"><label>Period</label>
+          <select id="auto-weeks"><option value="1">1 week</option><option value="2" selected>2 weeks</option><option value="4">4 weeks</option></select>
+        </div>
+        <div class="fg"><label>Mode</label>
+          <select id="auto-mode">
+            <option value="balanced">Balanced (fairness first)</option>
+            <option value="pref">Preference-weighted</option>
+            <option value="coverage">Coverage-first</option>
+          </select>
+        </div>
+        <div class="fg"><label>Overwrite auto-shifts?</label>
+          <select id="auto-overwrite">
+            <option value="no">No — fill gaps only</option>
+            <option value="yes">Yes — re-schedule all</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="run-btn" onclick="runAutoSchedule()" style="align-self:flex-end;">Run Auto-Schedule</button>
+        <button class="btn btn-danger" onclick="clearAutoShifts()" style="align-self:flex-end;">Clear</button>
+      </div>
+      <div class="auto-summary">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;">Active Rules</div>
+        <div class="auto-rule"><div class="rule-dot"></div><div><strong>Fair distribution</strong> — least-worked analyst first; TLs tracked separately</div></div>
+        <div class="auto-rule"><div class="rule-dot"></div><div><strong>TL availability</strong> — flags if fewer than min TLs available per day</div></div>
+        <div class="auto-rule"><div class="rule-dot"></div><div><strong>Preference-aware</strong> — preferred shifts boosted; disliked penalised; unavailable = never assigned</div></div>
+        <div class="auto-rule"><div class="rule-dot"></div><div><strong>Rest rules</strong> — no early shift immediately after overnight (7pm)</div></div>
+        <div class="auto-rule"><div class="rule-dot"></div><div><strong>Weekend balance</strong> — weekend shifts spread evenly across analysts</div></div>
+        <div class="auto-rule"><div class="rule-dot"></div><div><strong>Leave protection</strong> — AL, TOIL, Day Off, Standby never overwritten</div></div>
+      </div>
+      <div id="auto-result"></div>
+      <div class="sec-label">Fairness Scores</div>
+      <div id="fairness-table"></div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-prefs">
+    <div class="panel">
+      <div class="section-title">Shift Preferences</div>
+      <div class="info-box">Set preferred, disliked or unavailable shifts per analyst. The auto-scheduler uses these when assigning shifts.</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <label style="font-size:11px;color:var(--ac-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Analyst</label>
+        <select id="pref-analyst" onchange="renderPrefs()"></select>
+      </div>
+      <div id="pref-content"></div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-analysts">
+    <div class="panel">
+      <div class="section-title">Analysts &amp; Team Leaders</div>
+      <div class="form-row">
+        <div class="fg"><label>Name</label><input type="text" id="an" placeholder="Full name"></div>
+        <div class="fg"><label>Team</label><input type="text" id="at" placeholder="e.g. TK"></div>
+        <div class="fg"><label>Team Leader</label><input type="text" id="atl" placeholder="TL name"></div>
+        <div class="fg"><label>Role</label>
+          <select id="ar"><option>Analyst</option><option>Team Leader</option><option>Overnight Analyst</option></select>
+        </div>
+        <div class="fg"><label>Email</label><input type="email" id="ae" placeholder="optional"></div>
+        <button class="btn btn-primary" onclick="addAnalyst()" style="align-self:flex-end;">Add</button>
+      </div>
+      <div id="alist"></div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-reqs">
+    <div class="panel">
+      <div class="section-title">Coverage Requirements</div>
+      <div class="info-box">Analyst-only shift minimums. Team Leaders are excluded from these counts. TL availability is tracked separately below.</div>
+      <div class="sec-label">Weekday minimums (analysts only)</div>
+      <div class="req-grid" id="rg-wd"></div>
+      <hr class="divider">
+      <div class="sec-label">Weekend minimums (skeleton staffing)</div>
+      <div class="req-grid" id="rg-we"></div>
+      <hr class="divider">
+      <div class="sec-label">Team Leader availability</div>
+      <div class="purple-box">Days with fewer than the minimum TLs available are flagged separately. TLs are considered unavailable when marked AL, TOIL, or Day Off.</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <label style="font-size:12px;font-weight:600;color:var(--ac-muted);text-transform:uppercase;letter-spacing:.03em;">Min TLs available per day:</label>
+        <input type="number" id="req-tl" min="1" max="10" value="2" style="width:70px;" oninput="saveReqs();renderRota();">
+      </div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-swaps">
+    <div class="panel">
+      <div class="section-title">Shift Swap Requests</div>
+      <div class="form-row">
+        <div class="fg"><label>From</label><select id="sw-from"><option value="">Select</option></select></div>
+        <div class="fg"><label>Date</label><input type="date" id="sw-date"></div>
+        <div class="fg"><label>Swap with</label><select id="sw-to"><option value="">Select</option></select></div>
+        <div class="fg"><label>Note</label><input type="text" id="sw-note" placeholder="optional"></div>
+        <button class="btn btn-primary" onclick="submitSwap()" style="align-self:flex-end;">Submit</button>
+      </div>
+      <div id="swap-list"></div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-stats">
+    <div class="panel">
+      <div class="section-title">Monthly Stats</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
+        <select id="stat-month"></select>
+        <select id="stat-team"><option value="">All teams</option></select>
+      </div>
+      <div id="stats-content"></div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-mobile">
+    <div class="panel">
+      <div class="section-title">Analyst View</div>
+      <div class="info-box">Shows an individual's upcoming shifts — as they would see on their phone.</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
+        <select id="mob-analyst"><option value="">Select person</option></select>
+        <select id="mob-weeks"><option value="2">Next 2 weeks</option><option value="4">Next 4 weeks</option></select>
+      </div>
+      <div id="mob-view"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var SHIFTS=['6am','7am','8am','9am','10am','2pm','7pm','AL','TOIL','SB','OFF',''];
+var WORK_SHIFTS=['6am','7am','8am','9am','10am','2pm','7pm'];
+var SLABELS={'6am':'6am (8hr)','7am':'7am (8hr)','8am':'8am (8hr)','9am':'9am (8hr)','10am':'10am (8hr)','2pm':'2pm (8hr)','7pm':'7pm Overnight','AL':'Annual Leave','TOIL':'TOIL','SB':'Standby','OFF':'Day Off','':'—'};
+var SCLS={'6am':'s-6am','7am':'s-7am','8am':'s-8am','9am':'s-9am','10am':'s-10am','2pm':'s-2pm','7pm':'s-7pm','AL':'s-AL','TOIL':'s-TOIL','SB':'s-SB','OFF':'s-OFF','':'s-empty'};
+var EARLY=['6am','7am','8am'];
+var PROTECTED=['AL','TOIL','SB','OFF'];
+var TL_UNAVAIL=['AL','TOIL','OFF'];
+var DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function isTL(a){return a.role==='Team Leader';}
+function isAnalyst(a){return a.role!=='Team Leader';}
+function getMonday(d){var dt=new Date(d),dy=dt.getDay();dt.setDate(dt.getDate()-dy+(dy===0?-6:1));dt.setHours(0,0,0,0);return dt;}
+function isoWeek(d){var dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));var dy=dt.getUTCDay()||7;dt.setUTCDate(dt.getUTCDate()+4-dy);var ys=new Date(Date.UTC(dt.getUTCFullYear(),0,1));return Math.ceil((((dt-ys)/86400000)+1)/7);}
+function dKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function pad(n){return String(n).padStart(2,'0');}
+function fmtD(d){return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear();}
+function isWE(d){return d.getDay()===0||d.getDay()===6;}
+function addDays(d,n){var dt=new Date(d);dt.setDate(dt.getDate()+n);return dt;}
+function tlAvailCount(day){var dk=dKey(day);return analysts.filter(function(a){return isTL(a)&&TL_UNAVAIL.indexOf(rota[a.id+'_'+dk]||'')===-1;}).length;}
+
+var analysts=[],rota={},reqs={wd:{},we:{},minTL:2},swaps=[],prefs={},autoKeys=[];
+
+function load(){
+  try{analysts=JSON.parse(localStorage.getItem('ac4_a')||'[]');}catch(e){analysts=[];}
+  try{rota=JSON.parse(localStorage.getItem('ac4_r')||'{}');}catch(e){rota={};}
+  try{reqs=JSON.parse(localStorage.getItem('ac4_q')||'{"wd":{},"we":{},"minTL":2}');}catch(e){reqs={wd:{},we:{},minTL:2};}
+  try{swaps=JSON.parse(localStorage.getItem('ac4_s')||'[]');}catch(e){swaps=[];}
+  try{prefs=JSON.parse(localStorage.getItem('ac4_p')||'{}');}catch(e){prefs={};}
+  try{autoKeys=JSON.parse(localStorage.getItem('ac4_ak')||'[]');}catch(e){autoKeys=[];}
+  if(!reqs.wd)reqs.wd={};if(!reqs.we)reqs.we={};if(!reqs.minTL)reqs.minTL=2;
+  if(analysts.length===0)seed();
+}
+function save(){localStorage.setItem('ac4_a',JSON.stringify(analysts));localStorage.setItem('ac4_r',JSON.stringify(rota));localStorage.setItem('ac4_ak',JSON.stringify(autoKeys));}
+function saveReqs(){document.querySelectorAll('.ri-wd').forEach(function(i){reqs.wd[i.dataset.s]=parseInt(i.value)||0;});document.querySelectorAll('.ri-we').forEach(function(i){reqs.we[i.dataset.s]=parseInt(i.value)||0;});var tl=document.getElementById('req-tl');if(tl)reqs.minTL=parseInt(tl.value)||2;localStorage.setItem('ac4_q',JSON.stringify(reqs));}
+function saveSwaps(){localStorage.setItem('ac4_s',JSON.stringify(swaps));}
+function savePrefs(){localStorage.setItem('ac4_p',JSON.stringify(prefs));}
+function isAutoKey(k){return autoKeys.indexOf(k)!==-1;}
+function addAutoKey(k){if(!isAutoKey(k))autoKeys.push(k);}
+function removeAutoKey(k){autoKeys=autoKeys.filter(function(x){return x!==k;});}
+
+function seed(){
+  var teams=[{t:'TK',tl:'Alex Morgan'},{t:'PM',tl:'Sam Taylor'},{t:'SB',tl:'Jordan Lee'}];
+  var id=10;
+  teams.forEach(function(tm){analysts.push({id:id++,name:tm.tl,team:tm.t,tl:tm.tl,role:'Team Leader',email:''});for(var i=0;i<4;i++)analysts.push({id:id++,name:tm.t+' Analyst '+(i+1),team:tm.t,tl:tm.tl,role:'Analyst',email:''}); });
+  analysts.push({id:id++,name:'Night Owl Ana',team:'TK',tl:'Alex Morgan',role:'Overnight Analyst',email:''});
+  WORK_SHIFTS.forEach(function(s){reqs.wd[s]=1;reqs.we[s]=s==='7pm'?1:0;});reqs.minTL=2;
+  var oa=analysts.filter(function(a){return a.role==='Overnight Analyst';})[0];
+  if(oa){prefs[oa.id]={shifts:{},unavailDays:[0,6]};WORK_SHIFTS.forEach(function(s){prefs[oa.id].shifts[s]=s==='7pm'?'liked':'disliked';});}
+  save();
+}
+function getPref(aid){if(!prefs[aid])prefs[aid]={shifts:{},unavailDays:[]};return prefs[aid];}
+function getTeams(){return [...new Set(analysts.map(function(a){return a.team;}))].filter(Boolean);}
+function getDays(wo){var wc=parseInt(wo||document.getElementById('wc').value||'2');var wi=document.getElementById('wi');var start=getMonday(new Date());if(wi&&wi.value)start=new Date(wi.value+'T00:00:00');var days=[];for(var w=0;w<wc;w++)for(var d=0;d<7;d++){var dt=new Date(start);dt.setDate(start.getDate()+w*7+d);days.push(dt);}return days;}
+function getReq(sh,day){return isWE(day)?(reqs.we[sh]||0):(reqs.wd[sh]||0);}
+
+function runAutoSchedule(){
+  var weeks=parseInt(document.getElementById('auto-weeks').value||'2');
+  var mode=document.getElementById('auto-mode').value;
+  var overwrite=document.getElementById('auto-overwrite').value==='yes';
+  var days=getDays(weeks);
+  var btn=document.getElementById('run-btn');btn.textContent='Scheduling…';btn.disabled=true;
+  setTimeout(function(){var result=scheduleRota(days,mode,overwrite);save();renderRota();showAutoResult(result,days);renderFairnessTable(days);btn.textContent='Run Auto-Schedule';btn.disabled=false;document.getElementById('tb-auto').style.display='';},60);
+}
+
+function scheduleRota(days,mode,overwrite){
+  var assigned=0,gaps=[],tlGaps=[];
+  var shiftCount={},weekendCount={};
+  analysts.filter(isAnalyst).forEach(function(a){shiftCount[a.id]=0;weekendCount[a.id]=0;});
+  Object.keys(rota).forEach(function(k){var parts=k.split('_'),aid=parts[0],v=rota[k];if(WORK_SHIFTS.indexOf(v)!==-1&&shiftCount[aid]!==undefined)shiftCount[aid]++;});
+  days.forEach(function(day){
+    var dk=dKey(day),we=isWE(day);
+    WORK_SHIFTS.forEach(function(sh){
+      var req=getReq(sh,day);if(req===0)return;
+      var current=analysts.filter(function(a){return isAnalyst(a)&&(rota[a.id+'_'+dk]||'')===sh;}).length;
+      var needed=req-current;if(needed<=0)return;
+      var candidates=analysts.filter(function(a){
+        if(isTL(a))return false;
+        var k=a.id+'_'+dk,existing=rota[k]||'';
+        if(PROTECTED.indexOf(existing)!==-1)return false;
+        if(WORK_SHIFTS.indexOf(existing)!==-1){if(isAutoKey(k)&&overwrite){}else return false;}
+        if(existing===sh)return false;
+        var p=getPref(a.id);
+        if(p.unavailDays&&p.unavailDays.indexOf(day.getDay())!==-1)return false;
+        if(p.shifts&&p.shifts[sh]==='unavail')return false;
+        var prevShift=rota[a.id+'_'+dKey(addDays(day,-1))]||'';
+        if(prevShift==='7pm'&&EARLY.indexOf(sh)!==-1)return false;
+        return true;
+      });
+      if(!candidates.length){gaps.push({date:fmtD(day),shift:sh,needed:needed});return;}
+      candidates=candidates.map(function(a){
+        var score=0,p=getPref(a.id);
+        var fc=shiftCount[a.id]||0,maxFC=Math.max.apply(null,Object.values(shiftCount).concat([1]));
+        score+=(1-(fc/maxFC))*100;
+        if(we){var wc=weekendCount[a.id]||0,mwc=Math.max.apply(null,Object.values(weekendCount).concat([1]));score+=(1-(wc/mwc))*50;}
+        var psh=p.shifts&&p.shifts[sh];
+        if(psh==='liked')score+=(mode==='pref'?60:30);
+        if(psh==='disliked')score-=(mode==='pref'?60:30);
+        if(sh==='7pm'&&a.role==='Overnight Analyst')score+=40;
+        score+=Math.random()*5;
+        return{a:a,score:score};
+      }).sort(function(x,y){return y.score-x.score;});
+      var toAssign=Math.min(needed,candidates.length);
+      for(var i=0;i<toAssign;i++){var a=candidates[i].a,k=a.id+'_'+dk;rota[k]=sh;addAutoKey(k);shiftCount[a.id]++;if(we)weekendCount[a.id]++;assigned++;}
+      var still=needed-toAssign;if(still>0)gaps.push({date:fmtD(day),shift:sh,needed:still});
+    });
+    var tlCount=tlAvailCount(day);if(tlCount<(reqs.minTL||2))tlGaps.push({date:fmtD(day),count:tlCount,needed:reqs.minTL||2});
+  });
+  return{assigned:assigned,gaps:gaps,tlGaps:tlGaps};
+}
+
+function showAutoResult(result,days){
+  var el=document.getElementById('auto-result'),html='';
+  if(!result.gaps.length&&!result.tlGaps.length){html='<div class="success-box"><strong>Scheduled '+result.assigned+' shifts</strong> across '+days.length+' days. All requirements met.</div>';}
+  else{
+    if(result.gaps.length){var gl=result.gaps.slice(0,6).map(function(g){return '<div style="margin-top:3px;font-size:11px;">· '+g.date+' — '+g.shift+' ('+g.needed+' short)</div>';}).join('');html+='<div class="warn-box"><strong>Scheduled '+result.assigned+' shifts.</strong> '+result.gaps.length+' gap'+(result.gaps.length>1?'s':'')+' could not be filled.'+gl+'</div>';}
+    if(result.tlGaps.length){var tgl=result.tlGaps.slice(0,4).map(function(g){return '<div style="margin-top:3px;font-size:11px;">· '+g.date+' — only '+g.count+' TL'+(g.count!==1?'s':'')+' available (need '+g.needed+')</div>';}).join('');html+='<div class="warn-box" style="border-left-color:var(--ac-purple);background:var(--ac-purple-bg);"><strong>TL availability short on '+result.tlGaps.length+' day'+(result.tlGaps.length>1?'s':'')+'.</strong>'+tgl+'</div>';}
+  }
+  el.innerHTML=html;
+}
+
+function renderFairnessTable(days){
+  var el=document.getElementById('fairness-table');if(!el)return;
+  var counts={};analysts.filter(isAnalyst).forEach(function(a){counts[a.id]={total:0,overnight:0,weekend:0};});
+  days.forEach(function(d){analysts.filter(isAnalyst).forEach(function(a){var v=rota[a.id+'_'+dKey(d)]||'';if(WORK_SHIFTS.indexOf(v)!==-1){counts[a.id].total++;if(v==='7pm')counts[a.id].overnight++;if(isWE(d))counts[a.id].weekend++;}});});
+  var maxTotal=Math.max.apply(null,Object.values(counts).map(function(c){return c.total;}).concat([1]));
+  var h='<table class="data-table"><thead><tr><th>Analyst</th><th>Team</th><th>Shifts</th><th>Overnight</th><th>Weekend</th><th>Fairness</th></tr></thead><tbody>';
+  analysts.filter(isAnalyst).forEach(function(a){var c=counts[a.id],f=Math.round((c.total/maxTotal)*100);h+='<tr><td style="font-weight:600;">'+a.name+'</td><td><span class="badge b-grey" style="font-size:10px;">'+a.team+'</span></td><td style="font-weight:700;color:var(--ac-red);">'+c.total+'</td><td>'+c.overnight+'</td><td>'+c.weekend+'</td><td style="min-width:110px;"><div style="font-size:11px;color:var(--ac-muted);margin-bottom:2px;">'+f+'%</div><div class="fairness-bar"><div class="fairness-fill" style="width:'+f+'%"></div></div></td></tr>';});
+  h+='</tbody></table>';el.innerHTML=h;
+}
+
+function clearAutoShifts(){autoKeys.forEach(function(k){if(rota[k])delete rota[k];});autoKeys=[];save();renderRota();document.getElementById('tb-auto').style.display='none';var ar=document.getElementById('auto-result');if(ar)ar.innerHTML='';var ft=document.getElementById('fairness-table');if(ft)ft.innerHTML='';}
+
+function renderRota(){
+  var table=document.getElementById('rt');if(!table)return;
+  var days=getDays();
+  var tf=document.getElementById('tf'),teams=getTeams();
+  if(tf){var cv=tf.value;tf.innerHTML='<option value="">All teams</option>'+teams.map(function(t){return '<option value="'+t+'"'+(t===cv?' selected':'')+'>'+t+'</option>';}).join('');}
+  var teamFilter=tf?tf.value:'';
+  var fa=teamFilter?analysts.filter(function(a){return a.team===teamFilter;}):analysts;
+  var tlList=fa.filter(isTL),analystList=fa.filter(isAnalyst),byTeam={};
+  analystList.forEach(function(a){if(!byTeam[a.team])byTeam[a.team]=[];byTeam[a.team].push(a);});
+  var h='<thead><tr>';
+  h+='<th class="sc1 r0" rowspan="3" style="z-index:6;">Name</th><th class="sc2 r0" rowspan="3" style="z-index:6;">Role</th><th class="sc3 r0" rowspan="3" style="z-index:6;">TL</th>';
+  var mg=[],cm=-1,csp=0;
+  days.forEach(function(d){if(d.getMonth()!==cm){if(csp>0)mg.push({m:cm,y:d.getFullYear(),sp:csp});cm=d.getMonth();csp=1;}else csp++;});
+  if(csp>0)mg.push({m:cm,y:days[days.length-1].getFullYear(),sp:csp});
+  mg.forEach(function(g){h+='<th colspan="'+g.sp+'" class="r0" style="background:var(--ac-red);color:white;letter-spacing:.06em;">'+MN[g.m]+' '+g.y+'</th>';});
+  h+='</tr><tr>';
+  var wg=[],cw=-1,wsp=0;
+  days.forEach(function(d){var w=isoWeek(d);if(w!==cw){if(wsp>0)wg.push({w:cw,sp:wsp});cw=w;wsp=1;}else wsp++;});
+  if(wsp>0)wg.push({w:cw,sp:wsp});
+  wg.forEach(function(g){h+='<th colspan="'+g.sp+'" class="r1">Wk '+g.w+'</th>';});
+  h+='</tr><tr>';
+  days.forEach(function(d){h+='<th class="r2'+(isWE(d)?' we':'')+'" style="min-width:64px;">'+DN[d.getDay()]+'<br><span style="font-weight:400;font-size:9px;color:var(--ac-muted);">'+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'</span></th>';});
+  h+='</tr></thead><tbody>';
+  if(tlList.length>0){
+    h+='<tr class="tl-sec-hdr"><td class="sc1" colspan="3" style="position:sticky;left:0;z-index:2;">Team Leaders</td>';
+    days.forEach(function(d){var cnt=tlAvailCount(d),minTL=reqs.minTL||2,cls=cnt<minTL?'cov-tl-gap':'';h+='<td class="'+(isWE(d)?'we ':'')+cls+'" style="'+(cls?'':'color:var(--ac-purple);font-weight:700;')+'" title="'+cnt+' TL'+(cnt!==1?'s':'')+' available">'+cnt+'</td>';});
+    h+='</tr>';
+    tlList.forEach(function(a){
+      h+='<tr><td class="sc1" title="'+a.name+'" style="font-weight:600;">'+a.name+'</td><td class="sc2"><span class="badge b-purple" style="font-size:10px;">TL</span></td><td class="sc3">'+(a.tl||'')+'</td>';
+      days.forEach(function(d){var k=a.id+'_'+dKey(d),v=rota[k]||'',cls=(SCLS[v]||'')+(isAutoKey(k)?' s-auto':'');h+='<td class="'+(isWE(d)?'we':'')+'"><select class="cell-sel '+cls+'" data-key="'+k+'" onchange="setShift(this)">'+SHIFTS.map(function(s){return '<option value="'+s+'"'+(s===v?' selected':'')+'>'+(SLABELS[s]||'—')+'</option>';}).join('')+'</select></td>';});
+      h+='</tr>';
+    });
+  }
+  Object.keys(byTeam).sort().forEach(function(team){
+    var members=byTeam[team];
+    h+='<tr class="sec-hdr"><td class="sc1" colspan="3" style="position:sticky;left:0;z-index:2;">'+team+' — '+(members[0]?members[0].tl:'')+'</td>'+days.map(function(){return '<td></td>';}).join('')+'</tr>';
+    members.forEach(function(a){
+      var rb=a.role==='Overnight Analyst'?'b-blue':'b-grey',rl=a.role==='Overnight Analyst'?'ON':'AN';
+      h+='<tr><td class="sc1" title="'+a.name+'" style="font-weight:600;">'+a.name+'</td><td class="sc2"><span class="badge '+rb+'" style="font-size:10px;">'+rl+'</span></td><td class="sc3">'+(a.tl||'')+'</td>';
+      days.forEach(function(d){var k=a.id+'_'+dKey(d),v=rota[k]||'',cls=(SCLS[v]||'')+(isAutoKey(k)?' s-auto':'');h+='<td class="'+(isWE(d)?'we':'')+'"><select class="cell-sel '+cls+'" data-key="'+k+'" onchange="setShift(this)">'+SHIFTS.map(function(s){return '<option value="'+s+'"'+(s===v?' selected':'')+'>'+(SLABELS[s]||'—')+'</option>';}).join('')+'</select></td>';});
+      h+='</tr>';
+    });
+  });
+  h+='<tr class="sec-hdr"><td class="sc1" colspan="3" style="position:sticky;left:0;z-index:2;">Analyst Coverage</td>'+days.map(function(){return '<td></td>';}).join('')+'</tr>';
+  WORK_SHIFTS.forEach(function(sh){
+    h+='<tr><td class="sc1" colspan="3" style="font-size:10px;color:var(--ac-muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;">'+(sh==='7pm'?'7pm Overnight':sh)+'</td>';
+    days.forEach(function(d){var cnt=analysts.filter(function(a){return isAnalyst(a)&&(rota[a.id+'_'+dKey(d)]||'')===sh;}).length,req=getReq(sh,d),cls=req>0&&cnt<req?'cov-gap':'';h+='<td class="'+(isWE(d)?'we ':'')+cls+'" style="'+(cls?'':cnt>0?'color:var(--ac-green);font-weight:700;':'color:var(--ac-muted);')+'">'+cnt+'</td>';});
+    h+='</tr>';
+  });
+  h+='</tbody>';
+  table.innerHTML=h;updateBadges(days);renderCoverage(days);
+}
+
+function setShift(sel){var k=sel.dataset.key;removeAutoKey(k);rota[k]=sel.value;save();sel.className='cell-sel '+(SCLS[sel.value]||'');updateBadges(getDays());renderCoverage(getDays());}
+
+function updateBadges(days){
+  document.getElementById('tb-staff').textContent=analysts.length+' staff';
+  var gaps=0;days.forEach(function(d){WORK_SHIFTS.forEach(function(sh){var cnt=analysts.filter(function(a){return isAnalyst(a)&&(rota[a.id+'_'+dKey(d)]||'')===sh;}).length;if(getReq(sh,d)>0&&cnt<getReq(sh,d))gaps++;});});
+  var gb=document.getElementById('tb-gaps');if(gaps>0){gb.style.display='';gb.textContent=gaps+' analyst gap'+(gaps>1?'s':'');}else gb.style.display='none';
+  var tlGaps=0;days.forEach(function(d){if(tlAvailCount(d)<(reqs.minTL||2))tlGaps++;});
+  var tgb=document.getElementById('tb-tl');if(tlGaps>0){tgb.style.display='';tgb.textContent='TL cover short '+tlGaps+' day'+(tlGaps>1?'s':'');}else tgb.style.display='none';
+  var pending=swaps.filter(function(s){return s.status==='Pending';}).length;
+  var sb=document.getElementById('tb-swaps');if(pending>0){sb.style.display='';sb.textContent=pending+' swap'+(pending>1?'s':'')+' pending';}else sb.style.display='none';
+}
+
+function renderCoverage(days){
+  var today=new Date();today.setHours(0,0,0,0);var target=days[0];
+  for(var i=0;i<days.length;i++){var dt=new Date(days[i]);dt.setHours(0,0,0,0);if(dt>=today){target=days[i];break;}}
+  document.getElementById('cov-lbl').textContent=DN[target.getDay()]+' '+fmtD(target);
+  var dk=dKey(target),grid=document.getElementById('cov-grid');if(!grid)return;
+  var tlCnt=tlAvailCount(target),minTL=reqs.minTL||2,tlCls=tlCnt>=minTL?'tl-ok':tlCnt>0?'tl-warn':'tl-gap';
+  var html='<div class="cov-card-tl '+tlCls+'"><div class="ct">Team Leaders</div><div class="cn">'+tlCnt+'</div><div class="cr">min '+minTL+' available</div></div>';
+  html+=WORK_SHIFTS.map(function(sh){var cnt=analysts.filter(function(a){return isAnalyst(a)&&(rota[a.id+'_'+dk]||'')===sh;}).length,req=getReq(sh,target),cls=req===0?'ok':cnt>=req?'ok':cnt>0?'mn':'gp';return '<div class="cov-card '+cls+'"><div class="ct">'+(sh==='7pm'?'Overnight':sh)+'</div><div class="cn">'+cnt+'</div><div class="cr">min '+req+'</div></div>';}).join('');
+  grid.innerHTML=html;
+}
+
+function renderPrefs(){
+  var sel=document.getElementById('pref-analyst'),aid=sel?parseInt(sel.value):0,a=null;
+  for(var i=0;i<analysts.length;i++){if(analysts[i].id===aid){a=analysts[i];break;}}
+  var content=document.getElementById('pref-content');if(!content)return;
+  if(!a){content.innerHTML='<div style="color:var(--ac-muted);font-size:12px;">Select a person above.</div>';return;}
+  var p=getPref(a.id);if(!p.shifts)p.shifts={};if(!p.unavailDays)p.unavailDays=[];
+  var html='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;">'+a.name+'</div>';
+  html+='<div style="font-size:12px;color:var(--ac-muted);margin-bottom:14px;font-weight:500;">'+a.role+' · Team '+a.team+'</div>';
+  if(isTL(a))html+='<div class="purple-box">This person is a Team Leader — excluded from analyst coverage counts.</div>';
+  html+='<div class="sec-label">Shift preferences</div><div style="font-size:11px;color:var(--ac-muted);margin-bottom:8px;">Click to cycle: Neutral → Preferred → Disliked → Unavailable</div><div class="pref-row">';
+  WORK_SHIFTS.forEach(function(sh){var state=p.shifts[sh]||'neutral',lbl={neutral:'Neutral',liked:'Preferred',disliked:'Disliked',unavail:'Unavailable'}[state];html+='<div class="pref-chip'+(state!=='neutral'?' '+state:'')+'" onclick="cyclePref('+a.id+',\''+sh+'\')">'+sh+'<br><span style="font-size:10px;opacity:.8;">'+lbl+'</span></div>';});
+  html+='</div><div class="sec-label" style="margin-top:16px;">Unavailable days</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">';
+  DN.forEach(function(day,i){var unavail=p.unavailDays.indexOf(i)!==-1;html+='<div class="pref-chip'+(unavail?' unavail':'')+'" onclick="toggleUnavailDay('+a.id+','+i+')">'+day+'</div>';});
+  html+='</div><button class="btn btn-ghost btn-sm" onclick="clearPrefs('+a.id+')">Reset preferences</button>';
+  content.innerHTML=html;
+}
+function cyclePref(aid,sh){var p=getPref(aid);if(!p.shifts)p.shifts={};var cycle=['neutral','liked','disliked','unavail'],cur=p.shifts[sh]||'neutral';p.shifts[sh]=cycle[(cycle.indexOf(cur)+1)%cycle.length];savePrefs();renderPrefs();}
+function toggleUnavailDay(aid,i){var p=getPref(aid);if(!p.unavailDays)p.unavailDays=[];var idx=p.unavailDays.indexOf(i);if(idx!==-1)p.unavailDays.splice(idx,1);else p.unavailDays.push(i);savePrefs();renderPrefs();}
+function clearPrefs(aid){prefs[aid]={shifts:{},unavailDays:[]};savePrefs();renderPrefs();}
+
+function renderAnalysts(){
+  var list=document.getElementById('alist');if(!list)return;
+  if(!analysts.length){list.innerHTML='<div style="color:var(--ac-muted);font-size:12px;">No staff added yet.</div>';return;}
+  var sorted=analysts.filter(isTL).concat(analysts.filter(isAnalyst));
+  list.innerHTML=sorted.map(function(a){var ini=a.name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();var avCls='av'+(isTL(a)?' av-tl':a.role==='Overnight Analyst'?' av-on':'');return '<div class="a-row"><div class="'+avCls+'">'+ini+'</div><div style="flex:1;"><div style="font-weight:700;font-size:13px;">'+a.name+'</div><div style="font-size:11px;color:var(--ac-muted);font-weight:500;">'+a.role+' · '+a.team+' · TL: '+a.tl+'</div></div><button class="btn btn-danger btn-sm" onclick="delAnalyst('+a.id+')">Remove</button></div>';}).join('');
+}
+function addAnalyst(){var name=document.getElementById('an').value.trim(),team=document.getElementById('at').value.trim();if(!name||!team)return;analysts.push({id:Date.now(),name:name,team:team,tl:document.getElementById('atl').value.trim(),role:document.getElementById('ar').value,email:document.getElementById('ae').value.trim()});save();document.getElementById('an').value='';renderAnalysts();renderRota();refreshAll();}
+function delAnalyst(id){analysts=analysts.filter(function(a){return a.id!==id;});save();renderAnalysts();renderRota();refreshAll();}
+
+function refreshAll(){
+  var teams=getTeams();
+  ['tf','stat-team'].forEach(function(id){var el=document.getElementById(id);if(!el)return;var cv=el.value;el.innerHTML='<option value="">All teams</option>'+teams.map(function(t){return '<option value="'+t+'"'+(t===cv?' selected':'')+'>'+t+'</option>';}).join('');});
+  ['sw-from','sw-to','mob-analyst','pref-analyst'].forEach(function(id){var el=document.getElementById(id);if(!el)return;var cv=el.value;el.innerHTML='<option value="">Select person</option>'+analysts.map(function(a){return '<option value="'+a.id+'"'+(a.id==cv?' selected':'')+'>'+a.name+' ('+a.team+' · '+a.role+')</option>';}).join('');});
+}
+
+function renderReqs(){
+  ['wd','we'].forEach(function(type){var grid=document.getElementById('rg-'+type);if(!grid)return;grid.innerHTML=WORK_SHIFTS.map(function(sh){var val=(type==='wd'?reqs.wd:reqs.we)[sh]||0;return '<div class="req-card"><label>'+(sh==='7pm'?'7pm Overnight':sh+' (8hr)')+'</label><input type="number" min="0" max="20" value="'+val+'" class="ri-'+type+'" data-s="'+sh+'" oninput="saveReqs();renderRota();"></div>';}).join('');});
+  var tl=document.getElementById('req-tl');if(tl)tl.value=reqs.minTL||2;
+}
+
+function submitSwap(){var from=document.getElementById('sw-from').value,to=document.getElementById('sw-to').value,date=document.getElementById('sw-date').value,note=document.getElementById('sw-note').value;if(!from||!to||!date)return;var fa=null,ta=null;analysts.forEach(function(a){if(a.id==from)fa=a;if(a.id==to)ta=a;});swaps.push({id:Date.now(),from:fa?fa.name:from,to:ta?ta.name:to,date:date,note:note,status:'Pending'});saveSwaps();document.getElementById('sw-date').value='';document.getElementById('sw-note').value='';renderSwaps();updateBadges(getDays());}
+function updateSwapStatus(id,status){for(var i=0;i<swaps.length;i++){if(swaps[i].id==id){swaps[i].status=status;break;}}saveSwaps();renderSwaps();updateBadges(getDays());}
+function renderSwaps(){var list=document.getElementById('swap-list');if(!list)return;if(!swaps.length){list.innerHTML='<div style="color:var(--ac-muted);font-size:12px;margin-top:8px;">No swap requests.</div>';return;}list.innerHTML=[].concat(swaps).reverse().map(function(s){var scls=s.status==='Approved'?'b-green':s.status==='Declined'?'b-red':'b-amber';return '<div class="swap-card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><span style="font-weight:700;font-size:13px;">'+s.from+' ↔ '+s.to+'</span><span class="badge '+scls+'">'+s.status+'</span></div><div style="font-size:11px;color:var(--ac-muted);">Date: '+s.date+(s.note?' · '+s.note:'')+'</div>'+(s.status==='Pending'?'<div style="display:flex;gap:6px;margin-top:8px;"><button class="btn btn-success btn-sm" onclick="updateSwapStatus('+s.id+',\'Approved\')">Approve</button><button class="btn btn-danger btn-sm" onclick="updateSwapStatus('+s.id+',\'Declined\')">Decline</button></div>':'')+'</div>';}).join('');}
+
+function renderStats(){
+  var ms=document.getElementById('stat-month'),tf=document.getElementById('stat-team');if(!ms)return;
+  var month=parseInt(ms.value),year=parseInt(ms.dataset.year||new Date().getFullYear());
+  var teamFilter=tf?tf.value:'';var all=teamFilter?analysts.filter(function(a){return a.team===teamFilter;}):analysts;
+  var fa=all.filter(isAnalyst),tls=all.filter(isTL);
+  var daysInMonth=new Date(year,month+1,0).getDate(),days=[];for(var i=1;i<=daysInMonth;i++)days.push(new Date(year,month,i));
+  var totalAL=0,totalTOIL=0,totalON=0,totalSB=0;
+  fa.forEach(function(a){days.forEach(function(d){var v=rota[a.id+'_'+dKey(d)]||'';if(v==='AL')totalAL++;else if(v==='TOIL')totalTOIL++;else if(v==='7pm')totalON++;else if(v==='SB')totalSB++;});});
+  var content=document.getElementById('stats-content');if(!content)return;
+  var html='<div class="stats-grid"><div class="stat-card"><div class="sv" style="color:var(--ac-red);">'+fa.length+'</div><div class="sl">Analysts</div></div><div class="stat-card"><div class="sv" style="color:var(--ac-purple);">'+tls.length+'</div><div class="sl">Team Leaders</div></div><div class="stat-card"><div class="sv" style="color:var(--ac-red);">'+totalAL+'</div><div class="sl">Annual leave</div></div><div class="stat-card"><div class="sv" style="color:var(--ac-amber);">'+totalTOIL+'</div><div class="sl">TOIL</div></div><div class="stat-card"><div class="sv" style="color:var(--ac-blue);">'+totalON+'</div><div class="sl">Overnight</div></div></div>';
+  if(tls.length){html+='<div class="sec-label">Team Leaders</div><table class="data-table" style="margin-bottom:16px;"><thead><tr><th>Name</th><th>Team</th><th>AL</th><th>TOIL</th><th>Day Off</th><th>Available days</th></tr></thead><tbody>';tls.forEach(function(a){var al=0,toil=0,off=0,avail=0;days.forEach(function(d){var v=rota[a.id+'_'+dKey(d)]||'';if(v==='AL')al++;else if(v==='TOIL')toil++;else if(v==='OFF')off++;if(TL_UNAVAIL.indexOf(v)===-1)avail++;});html+='<tr><td style="font-weight:600;">'+a.name+'</td><td><span class="badge b-grey" style="font-size:10px;">'+a.team+'</span></td><td style="'+(al>3?'color:var(--ac-red);font-weight:700;':'')+'">'+al+'</td><td>'+toil+'</td><td>'+off+'</td><td style="font-weight:700;color:var(--ac-green);">'+avail+'</td></tr>';});html+='</tbody></table>';}
+  html+='<div class="sec-label">Analysts</div><table class="data-table"><thead><tr><th>Analyst</th><th>Team</th><th>AL</th><th>TOIL</th><th>Overnight</th><th>SB</th><th>Shifts</th></tr></thead><tbody>';
+  fa.forEach(function(a){var al=0,toil=0,on=0,sb=0,shifts=0;days.forEach(function(d){var v=rota[a.id+'_'+dKey(d)]||'';if(v==='AL')al++;else if(v==='TOIL')toil++;else if(v==='7pm')on++;else if(v==='SB')sb++;else if(v&&v!=='OFF')shifts++;});html+='<tr><td style="font-weight:600;">'+a.name+'</td><td><span class="badge b-grey" style="font-size:10px;">'+a.team+'</span></td><td style="'+(al>3?'color:var(--ac-red);font-weight:700;':'')+'">'+al+'</td><td>'+toil+'</td><td style="'+(on>0?'color:var(--ac-blue);font-weight:700;':'')+'">'+on+'</td><td>'+sb+'</td><td style="font-weight:700;color:var(--ac-green);">'+shifts+'</td></tr>';});
+  html+='</tbody></table>';content.innerHTML=html;
+}
+
+function initMonthSelect(){var ms=document.getElementById('stat-month');if(!ms||ms.dataset.init)return;ms.dataset.init='1';var now=new Date();ms.dataset.year=now.getFullYear();ms.innerHTML=MN.map(function(m,i){return '<option value="'+i+'"'+(i===now.getMonth()?' selected':'')+'>'+m+' '+now.getFullYear()+'</option>';}).join('');ms.onchange=renderStats;var st=document.getElementById('stat-team');if(st)st.onchange=renderStats;}
+
+function renderMobileView(){
+  var sel=document.getElementById('mob-analyst'),wks=parseInt((document.getElementById('mob-weeks')||{value:'2'}).value||'2'),aid=sel?parseInt(sel.value):0,a=null;
+  for(var i=0;i<analysts.length;i++){if(analysts[i].id===aid){a=analysts[i];break;}}
+  var view=document.getElementById('mob-view');if(!view)return;
+  if(!a){view.innerHTML='<div style="color:var(--ac-muted);font-size:12px;">Select a person above.</div>';return;}
+  var start=getMonday(new Date()),days=[];for(var w=0;w<wks;w++)for(var d=0;d<7;d++){var dt=new Date(start);dt.setDate(start.getDate()+w*7+d);days.push(dt);}
+  var html='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;">'+a.name+'</div><div style="font-size:12px;color:var(--ac-muted);font-weight:500;margin-bottom:14px;">'+a.role+' · Team '+a.team+'</div>';
+  days.forEach(function(d){var v=rota[a.id+'_'+dKey(d)]||'',cls=SCLS[v]||'',we=isWE(d);html+='<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--ac-border);'+(we?'opacity:0.45':'')+'"><div style="width:92px;font-size:12px;color:var(--ac-muted);font-weight:500;">'+DN[d.getDay()]+' '+fmtD(d)+'</div>'+(v?'<span class="'+cls+'" style="padding:3px 12px;font-size:12px;font-weight:600;">'+(SLABELS[v]||v)+'</span>':'<span style="font-size:12px;color:var(--ac-border2);">Not assigned</span>')+'</div>';});
+  view.innerHTML=html;
+}
+
+function showTab(tab){
+  document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('pane-'+tab).classList.add('active');
+  document.querySelector('.tab[onclick="showTab(\''+tab+'\')"]').classList.add('active');
+  if(tab==='rota')renderRota();else if(tab==='analysts')renderAnalysts();else if(tab==='reqs')renderReqs();else if(tab==='swaps')renderSwaps();else if(tab==='prefs'){refreshAll();renderPrefs();}else if(tab==='stats'){initMonthSelect();refreshAll();renderStats();}else if(tab==='mobile'){refreshAll();renderMobileView();}else if(tab==='auto'){if(autoKeys.length>0)renderFairnessTable(getDays(parseInt((document.getElementById('auto-weeks')||{value:'2'}).value)));}
+}
+
+function cloneWeek(){var days=getDays();if(days.length<14){alert('Switch to 2+ weeks to clone.');return;}var cloned=0;analysts.forEach(function(a){days.slice(0,7).forEach(function(d,i){var from=a.id+'_'+dKey(d),to=a.id+'_'+dKey(days[i+7]);if(rota[from]&&!rota[to]){rota[to]=rota[from];if(isAutoKey(from))addAutoKey(to);cloned++;}});});save();renderRota();alert('Cloned '+cloned+' shifts.');}
+function exportCSV(){var days=getDays();var rows=[['Name','Team','TL','Role'].concat(days.map(fmtD))];analysts.forEach(function(a){rows.push([a.name,a.team,a.tl,a.role].concat(days.map(function(d){return rota[a.id+'_'+dKey(d)]||'';})));});var csv=rows.map(function(r){return r.map(function(c){return '"'+c+'"';}).join(',');}).join('\n');var bl=new Blob([csv],{type:'text/csv'}),url=URL.createObjectURL(bl);var el=document.createElement('a');el.href=url;el.download='rota.csv';el.click();}
+
+load();
+var wi=document.getElementById('wi');
+if(wi){var m=getMonday(new Date());wi.value=m.getFullYear()+'-'+pad(m.getMonth()+1)+'-'+pad(m.getDate());wi.onchange=function(){renderRota();};}
+renderRota();refreshAll();
+document.getElementById('mob-analyst').onchange=renderMobileView;
+document.getElementById('mob-weeks').onchange=renderMobileView;
+if(autoKeys.length>0)document.getElementById('tb-auto').style.display='';
+</script>
+</body>
+</html>
